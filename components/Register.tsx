@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -11,26 +11,27 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useFormik } from "formik"
+import { useFormik } from "formik";
 import * as Yup from 'yup';
 import Swal from "sweetalert2";
-import { authLogin } from "@/fetch/auth"
-import Cookies from 'js-cookie';
+import { authRegister } from "@/fetch/auth"
 
-export function Login() {
+export function Register() {
     const formik = useFormik({
         initialValues: {
+            name: '',
             email: '',
             password: '',
         },
         validationSchema: Yup.object().shape({
+            name: Yup.string().required('Nama harus diisi'),
             email: Yup.string().required('Email harus diisi'),
             password: Yup.string().required('Password harus diisi'),
         }),
         enableReinitialize: true,
         onSubmit: async (values, { setStatus, setSubmitting }) => {
             try {
-                const response = await authLogin(values.email, values.password);
+                const response = await authRegister(values.name, values.email, values.password);
 
                 if (response.data.success) {
                     Swal.fire({
@@ -39,10 +40,9 @@ export function Login() {
                         showConfirmButton: false,
                         timer: 1500,
                         heightAuto: false
+                    }).then((res) => {
+                        window.location.href = "/";
                     })
-
-                    Cookies.set('authToken', response.data.data, { expires: 9999, path: '/' });
-                    window.location.href = "/dashboard";
                 }
             } catch (error: any) {
                 Swal.fire({
@@ -60,14 +60,28 @@ export function Login() {
         <div className={"flex flex-col gap-6"}>
             <Card>
                 <CardHeader>
-                    <CardTitle className="text-2xl">Login</CardTitle>
+                    <CardTitle className="text-2xl">Register</CardTitle>
                     <CardDescription>
-                        Masukkan email dan password Anda di bawah ini untuk masuk ke akun Anda
+                        Masukkan email dan password Anda di bawah ini untuk membuat akun
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={formik.handleSubmit}>
                         <div className="flex flex-col gap-6">
+                            <div className="grid gap-2">
+                                <Label htmlFor="email">Nama</Label>
+                                <Input
+                                    id="name"
+                                    type="text"
+                                    placeholder="Masukkan Nama"
+                                    {...formik.getFieldProps('name')}
+                                />
+                                {formik.touched.name && formik.errors.name && (
+                                    <div className="flex items-center">
+                                        <Label className="label-text text-xs text-red-600">{formik.errors.name}</Label>
+                                    </div>
+                                )}
+                            </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input
@@ -99,14 +113,8 @@ export function Login() {
                                 )}
                             </div>
                             <Button type="submit" className="w-full">
-                                Login
+                                Register
                             </Button>
-                            <div className="mt-4 text-center text-sm">
-                                Don&apos;t have an account?{" "}
-                                <a href="/register" className="underline underline-offset-4">
-                                    Sign up
-                                </a>
-                            </div>
                         </div>
                     </form>
                 </CardContent>
