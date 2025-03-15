@@ -23,3 +23,13 @@ export function authRegister(name: string, email: string, password: string) {
         },
     );
 }
+
+export function verifyToken(token: string) {
+    return axios.get(`${BASE_URL}/api/auth/verifyToken`,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    );
+}

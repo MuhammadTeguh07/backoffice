@@ -32,12 +32,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(401).json({ message: 'Email atau Password salah', success: false });
         }
 
-        // Generate JWT
+        // Generate JWT token
         const token = signToken({ id: user.id, email: user.email });
+        console.log(token)
+        // Simpan token ke dalam tabel Session
+        await prisma.session.create({
+            data: {
+                userId: user.id,
+                token,
+                expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24), // Expire dalam 24 jam
+            },
+        });
 
         // Response sukses dengan token
         return res.status(200).json({ message: 'Login berhasil', data: token, success: true });
     } catch (error) {
-        return res.status(500).json({ message: 'Terjadi kesalahan server', success: false });
+        return res.status(500).json({ message: error, success: false });
     }
 }

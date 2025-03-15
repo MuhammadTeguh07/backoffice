@@ -32,6 +32,9 @@ import {
 import { NavUser } from "./NavUser"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
+import { verifyToken } from "@/fetch/auth";
+import { useEffect } from "react";
+import Cookies from "js-cookie";
 
 const data = {
     user: {
@@ -44,6 +47,29 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const pathname = usePathname()
     const isActiveRoute = (route: string) => pathname === route
+
+    const getVerifyToken = async (token: string) => {
+        try {
+            const response = await verifyToken(token);
+
+            if (response.data.success) {
+                console.log(response.data)
+            }
+        } catch (error: any) {
+            handleLogout()
+        }
+    }
+
+    const handleLogout = () => {
+        Cookies.remove("authToken");
+        window.location.href = "/";
+    };
+
+    useEffect(() => {
+        let token = Cookies.get("authToken") || "";
+        if(token) getVerifyToken(token);    
+    }, [])
+
 
     return (
         <Sidebar variant="inset" {...props}>

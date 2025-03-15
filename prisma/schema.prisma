@@ -13,4 +13,16 @@ datasource db {
     password String
     name     String
     createdAt DateTime @default (now())
+
+    sessions  Session[] // Relasi ke tabel Sessions
+}
+
+  model Session {
+    id        String   @id @default(uuid())
+    userId    String
+    token     String   @unique @db.VarChar(512) // Maksimum 512 karakter
+    expiresAt DateTime
+    createdAt DateTime @default(now())
+
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
